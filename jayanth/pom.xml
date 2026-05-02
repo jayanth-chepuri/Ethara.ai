@@ -98,7 +98,7 @@
 			<version>5.5.13.3</version>
 		</dependency>
 
-		<!-- DevTools -->
+		<!-- DevTools (local development only) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>

@@ -1,13 +1,18 @@
 import axios from 'axios';
 
+// In development, CRA proxy (package.json "proxy") forwards /api → localhost:8080.
+// In production (Docker/nginx), nginx proxies /api → backend container.
+// REACT_APP_API_URL can override both (e.g. https://api.yourdomain.com/api).
+const BASE_URL = process.env.REACT_APP_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor
+// Attach JWT token to every request
 api.interceptors.request.use(
   (config) => {
     const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -19,7 +24,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Handle 401 globally — clear session and redirect to login
 api.interceptors.response.use(
   (response) => response,
   (error) => {

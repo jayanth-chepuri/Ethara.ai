@@ -4,6 +4,7 @@ services:
   mysql:
     image: mysql:8.0
     container_name: expense-tracker-mysql
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: expense_tracker
@@ -13,19 +14,25 @@ services:
       - mysql_data:/var/lib/mysql
       - ./src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 10s
       retries: 10
+      start_period: 30s
 
   backend:
     build: .
     container_name: expense-tracker-backend
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/expense_tracker?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      APP_JWT_SECRET: SmartExpenseTrackerSecretKey2024VeryLongSecretKeyForJWTSigning
+      APP_JWT_EXPIRATION: 86400000
+      APP_CORS_ORIGINS: http://localhost:3000
     depends_on:
       mysql:
         condition: service_healthy
@@ -33,6 +40,7 @@ services:
   frontend:
     build: ../expense-tracker-frontend
     container_name: expense-tracker-frontend
+    restart: unless-stopped
     ports:
       - "3000:80"
     depends_on:
