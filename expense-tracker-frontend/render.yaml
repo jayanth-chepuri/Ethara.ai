@@ -1,0 +1,16 @@
+# Render Static Site configuration for the React frontend
+# Place this file in the frontend root directory
+
+services:
+  - type: web
+    name: expense-tracker-frontend
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://your-backend-service.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

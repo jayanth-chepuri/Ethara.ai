@@ -1,0 +1,37 @@
+services:
+  # ── Backend (Spring Boot) ──────────────────────────────────────────────────
+  - type: web
+    name: expense-tracker-backend
+    runtime: docker
+    dockerfilePath: ./jayanth/Dockerfile
+    dockerContext: ./jayanth
+    plan: starter
+    healthCheckPath: /api-docs
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false          # fill in Render dashboard
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: APP_JWT_SECRET
+        generateValue: true  # Render auto-generates a secure random value
+      - key: APP_JWT_EXPIRATION
+        value: 86400000
+      - key: APP_CORS_ORIGINS
+        sync: false          # set to your frontend URL after first deploy
+
+  # ── Frontend (React Static Site) ──────────────────────────────────────────
+  - type: web
+    name: expense-tracker-frontend
+    runtime: static
+    rootDir: expense-tracker-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false          # set to https://expense-tracker-backend.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
